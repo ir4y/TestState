@@ -65,23 +65,30 @@ func getByPath(state: State, path:[String]) -> Value? {
     }
 }
 
- func setByPath(state: inout State, path:[String], newValue: Value) {
+ func setByPath(state: inout State, path:[String], newValue: Value) -> Value? {
     if(path.count == 0){
-        return
+        return nil
     }
     if(path.count == 1){
         state[path.first!] = newValue
-        return
+        return Value.state(state)
     }
     let value = state[path.first!]
     switch value {
-        case .state(var state):
-            setByPath(state: &state,
+        case .state(var valState):
+            let res = setByPath(state: &valState,
+                                path: Array(path.dropFirst()),
+                                newValue: newValue)
+            state[path.first!] = res
+        default:
+            var newState:State = [:]
+            let res = setByPath(state: &newState,
                       path: Array(path.dropFirst()),
                       newValue: newValue)
-        default:
-            return
+            state[path.first!] = res
+            return  Value.state(newState)
     }
+     return nil
 }
 
 
@@ -94,8 +101,10 @@ struct ContentView: View {
                       text: vm.bind(path: ["firstName"]))
             TextField("Last name",
                       text: vm.bind(path: ["lastName"]))
+            TextField("nicotine use",
+                      text: vm.bind(path: ["nicotine", "use"]))
             Divider()
-            Button("Reset") { self.vm.dict = [:] }
+            Button("Reset") { self.vm.dict = ["nicotine":Value.state(["use":Value.string("No")])] }
             Text(formatValue(v: Value.state(self.vm.dict)))
         }
 
