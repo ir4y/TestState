@@ -36,12 +36,12 @@ class DictModel: ObservableObject {
     func bind(path:[String]) -> Binding<String>{
         return Binding<String>(get: {
             let val = getByPath(state: self.dict, path: path);
-                switch val {
-                    case .string(let s):
-                    return s;
-                default:
-                    return "";
-                }
+            switch val {
+                case .string(let s):
+                return s;
+            default:
+                return "";
+            }
         }, set: {
             setByPath(state: &self.dict, path:path, newValue: Value.string($0))
                 
